@@ -386,7 +386,7 @@ public class WxCartController {
      * @return 购物车操作结果
      */
     @GetMapping("checkout")
-    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer couponId, Integer grouponRulesId) {
+    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer couponId, Integer userCouponId, Integer grouponRulesId) {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }
@@ -395,7 +395,7 @@ public class WxCartController {
         LitemallAddress checkedAddress = null;
         if (addressId == null || addressId.equals(0)) {
             checkedAddress = addressService.findDefault(userId);
-            // 如果仍然没有地址，则是没有收获地址
+            // 如果仍然没有地址，则是没有收货地址
             // 返回一个空的地址id=0，这样前端则会提醒添加地址
             if (checkedAddress == null) {
                 checkedAddress = new LitemallAddress();
@@ -445,10 +445,12 @@ public class WxCartController {
         // 计算优惠券可用情况
         BigDecimal tmpCouponPrice = new BigDecimal(0.00);
         Integer tmpCouponId = 0;
+        Integer tmpUserCouponId = 0;
         int tmpCouponLength = 0;
         List<LitemallCouponUser> couponUserList = couponUserService.queryAll(userId);
         for(LitemallCouponUser couponUser : couponUserList){
-            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponUser.getCouponId(), checkedGoodsPrice);
+            tmpUserCouponId = couponUser.getId();
+            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponUser.getCouponId(), tmpUserCouponId, checkedGoodsPrice);
             if(coupon == null){
                 continue;
             }
@@ -468,17 +470,20 @@ public class WxCartController {
         // 3. 用户已选择优惠券，则测试优惠券是否合适
         if (couponId == null || couponId.equals(-1)){
             couponId = -1;
+            userCouponId = -1;
         }
         else if (couponId.equals(0)) {
             couponPrice = tmpCouponPrice;
             couponId = tmpCouponId;
+            userCouponId = tmpUserCouponId;
         }
         else {
-            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponId, checkedGoodsPrice);
+            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponId, userCouponId, checkedGoodsPrice);
             // 用户选择的优惠券有问题，则选择合适优惠券，否则使用用户选择的优惠券
             if(coupon == null){
                 couponPrice = tmpCouponPrice;
                 couponId = tmpCouponId;
+                userCouponId = tmpUserCouponId;
             }
             else {
                 couponPrice = coupon.getDiscount();
@@ -502,6 +507,7 @@ public class WxCartController {
         Map<String, Object> data = new HashMap<>();
         data.put("addressId", addressId);
         data.put("couponId", couponId);
+        data.put("userCouponId", userCouponId);
         data.put("cartId", cartId);
         data.put("grouponRulesId", grouponRulesId);
         data.put("grouponPrice", grouponPrice);
