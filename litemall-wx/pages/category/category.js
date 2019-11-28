@@ -13,7 +13,7 @@ Page({
     page: 1,
     limit: 10
   },
-  onLoad: function(options) {
+  onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
     var that = this;
     if (options.id) {
@@ -23,7 +23,7 @@ Page({
     }
 
     wx.getSystemInfo({
-      success: function(res) {
+      success: function (res) {
         that.setData({
           scrollHeight: res.windowHeight
         });
@@ -34,12 +34,12 @@ Page({
     this.getCategoryInfo();
 
   },
-  getCategoryInfo: function() {
+  getCategoryInfo: function () {
     let that = this;
     util.request(api.GoodsCategory, {
-        id: this.data.id
-      })
-      .then(function(res) {
+      id: this.data.id
+    })
+      .then(function (res) {
 
         if (res.errno == 0) {
           that.setData({
@@ -72,7 +72,8 @@ Page({
               scrollLeft: currentIndex * 60
             });
           }
-          that.getGoodsList();
+          // that.getGoodsList();
+          that.loadFirstPage();
 
         } else {
           //显示错误信息
@@ -80,33 +81,112 @@ Page({
 
       });
   },
-  onReady: function() {
+  onReady: function () {
     // 页面渲染完成
   },
-  onShow: function() {
+  onShow: function () {
     // 页面显示
   },
-  onHide: function() {
+  onHide: function () {
     // 页面隐藏
   },
-  getGoodsList: function() {
+  onPullDownRefresh() {
+    this.loadFirstPage();
+  },
+
+  getGoodsList: function () {
     var that = this;
 
     util.request(api.GoodsList, {
-        categoryId: that.data.id,
-        page: that.data.page,
-        limit: that.data.limit
-      })
-      .then(function(res) {
-        that.setData({
-          goodsList: res.data.list,
-        });
+      categoryId: that.data.id,
+      page: that.data.page,
+      limit: that.data.limit
+    }).then(function (res) {
+      that.setData({
+        goodsList: res.data.list,
       });
+    });
   },
-  onUnload: function() {
+
+  getDdmGoodsList: function () {
+    var that = this;
+
+    util.request('http://m2.ddm-home.com/List/GetApiProductList', {
+      allimg: false,
+      navigatId: 3,
+      page: that.data.page,
+      pageSize: 10,
+      sort: 'time-desc'
+    }, 'POST').then(function (res) {
+      that.setData({
+        goodsList: that.data.goodsList.concat(res.msg.Products)
+      });
+    });
+  },
+
+  configProductName: function (products) {
+    for (var i = 0; i < products.length; i++) {
+      products[i].Name = products[i].Name.substring(15, products[i].Name.length);
+      console.log(products[i].Name)
+    }
+  },
+
+  loadFirstPage: function () {
+    var that = this;
+    that.setData({
+      page: 1,
+      goodsList: []
+    });
+    wx.showLoading({
+      title: '正在加载中...'
+    });
+    util.request('http://m2.ddm-home.com/List/GetApiProductList', {
+      allimg: false,
+      navigatId: 3,
+      page: that.data.page,
+      pageSize: 10,
+      sort: 'time-desc'
+    }, 'POST').then(function (res) {
+      wx.hideLoading();
+      that.configProductName(res.msg.Products);
+      that.setData({
+        goodsList: that.data.goodsList.concat(res.msg.Products)
+      });
+    });
+  },
+
+  loadNextPage: function () {
+    var that = this;
+    that.setData({
+      page: this.data.page + 1
+    });
+    wx.showLoading({
+      title: '正在加载中...'
+    });
+    util.request('http://m2.ddm-home.com/List/GetApiProductList', {
+      allimg: false,
+      navigatId: 3,
+      page: that.data.page,
+      pageSize: 10,
+      sort: 'time-desc'
+    }, 'POST').then(function (res) {
+      wx.hideLoading();
+      that.configProductName(res.msg.Products);
+      that.setData({
+        goodsList: that.data.goodsList.concat(res.msg.Products)
+      });
+    });
+  },
+
+  onUnload: function () {
     // 页面关闭
   },
-  switchCate: function(event) {
+
+  onReachBottom: function () {
+    this.loadNextPage();
+  },
+
+  switchCate: function (event) {
     if (this.data.id == event.currentTarget.dataset.id) {
       return false;
     }

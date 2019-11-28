@@ -23,16 +23,17 @@ function formatNumber(n) {
  * 封封微信的的request
  */
 function request(url, data = {}, method = "GET") {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     wx.request({
       url: url,
       data: data,
       method: method,
       header: {
         'Content-Type': 'application/json',
-        'X-Litemall-Token': wx.getStorageSync('token')
+        'X-Litemall-Token': wx.getStorageSync('token'),
+        'Cookie': '.ASPXAUTH=D1AD7334A61E7AB6423CEC6B8CE1EC5DA20E664362D1A1DCD10A960B93E62B7DDFCD30EFE15D317480B5CE2C11DEFA1A8087F14B10B81CCACB0B7457364FB3AA875A710EB71CE65AB00647C6E948DBC6A7ACC6800CF27063C79B02B1BDF7A54EB24044478FDAF5E5E2934634A69087C894BF9772604C5E639EE9E9DE0CD1939A3336325BB7A917D5175B9240F0CD45ADFB68B8397BB51C56C7FE578A02E7E4A7; Nop.customer=e18423dd-0a60-4887-84a0-d148034dbb18; __jsluid_h=f109c6d4ec4115b28e3e97031ec84670'
       },
-      success: function(res) {
+      success: function (res) {
 
         if (res.statusCode == 200) {
 
@@ -56,7 +57,7 @@ function request(url, data = {}, method = "GET") {
         }
 
       },
-      fail: function(err) {
+      fail: function (err) {
         reject(err)
       }
     })
