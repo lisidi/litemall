@@ -40,7 +40,7 @@
 }
 
 .cate-item {
-  margin-top: 94rpx;
+  /* margin-top: 94rpx; */
   height: auto;
   overflow: hidden;
 }

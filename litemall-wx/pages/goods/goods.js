@@ -686,10 +686,6 @@ Page({
 
   loadDDMProductDetail: function () {
     var that = this;
-    // that.setData({
-    //   page: 1,
-    //   goodsList: []
-    // });
     wx.showLoading({
       title: '正在加载中...'
     });
@@ -699,6 +695,7 @@ Page({
     }, 'POST').then(function (res) {
       wx.hideLoading();
       that.configProductName(res.msg)
+      that.processItemPrice(res.msg)
       that.setData({
         goods: res.msg,
       });
@@ -707,6 +704,11 @@ Page({
 
   configProductName: function (product) {
     product.Name = product.Name.substring(15, product.Name.length);
+  },
+
+  processItemPrice: function (product) {
+    var newPrice = product.Price * 1.20;
+    product.Price = parseInt(newPrice);
   },
 
 })

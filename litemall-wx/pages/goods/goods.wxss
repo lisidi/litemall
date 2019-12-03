@@ -83,7 +83,7 @@
   /* border: 1px solid black; */
   height: 86rpx;
   line-height: 86rpx;
-  border-bottom: 1px solid #fafafa;
+  /* border-bottom: 1px solid #fafafa; */
 }
 
 .goods_name_left {

@@ -1,11 +1,11 @@
 <view class="container_catagory">
-  <view class="cate-nav">
+  <!-- <view class="cate-nav">
     <scroll-view scroll-x="true" class="cate-nav-body" style="width: 750rpx;background: #fff;" scroll-left="{{scrollLeft}}">
       <view wx:for="{{navList}}" class="item {{ id == item.id ? 'active' : ''}}" wx:key="id" data-id="{{item.id}}" data-index="{{index}}" bindtap="switchCate">
         <view class="name">{{item.name}}</view>
       </view>
     </scroll-view>
-  </view>
+  </view> -->
   <scroll-view scroll-y="true" scroll-top="{{scrollTop}}" style="height:{{scrollHeight}};">
 
     <view class="cate-item">

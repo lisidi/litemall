@@ -11,7 +11,8 @@ Page({
     scrollTop: 0,
     scrollHeight: 0,
     page: 1,
-    limit: 10
+    limit: 10,
+    catagoryId: ''
   },
   onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -32,8 +33,31 @@ Page({
 
 
     this.getCategoryInfo();
+    this.getDDMCatagoryId();
+
 
   },
+
+  getDDMCatagoryId: function () {
+    var dic = {
+      "1036008": "3",
+      "1036009": "4",
+      "1036010": "6",
+      "1036011": "5",
+      "1036012": "2",
+      "1036013": "7",
+      "1036014": "11",
+      "1036015": "10",
+      "1036016": "9",
+      "1036017": "8"
+    };
+    var catagoryId = dic[this.data.id];
+    console.log('123' + catagoryId);
+    this.setData({
+      catagoryId: catagoryId
+    });
+  },
+
   getCategoryInfo: function () {
     let that = this;
     util.request(api.GoodsCategory, {
@@ -113,7 +137,7 @@ Page({
 
     util.request('http://m2.ddm-home.com/List/GetApiProductList', {
       allimg: false,
-      navigatId: 3,
+      navigatId: this.data.catagoryId,
       page: that.data.page,
       pageSize: 10,
       sort: 'time-desc'
@@ -131,6 +155,13 @@ Page({
     }
   },
 
+  processItemPrice: function (products) {
+    for (var i = 0; i < products.length; i++) {
+      var newPrice = products[i].Price * 1.20;
+      products[i].Price = parseInt(newPrice);
+    }
+  },
+
   loadFirstPage: function () {
     var that = this;
     that.setData({
@@ -142,13 +173,14 @@ Page({
     });
     util.request('http://m2.ddm-home.com/List/GetApiProductList', {
       allimg: false,
-      navigatId: 3,
+      navigatId: this.data.catagoryId,
       page: that.data.page,
       pageSize: 10,
       sort: 'time-desc'
     }, 'POST').then(function (res) {
       wx.hideLoading();
       that.configProductName(res.msg.Products);
+      that.processItemPrice(res.msg.Products);
       that.setData({
         goodsList: that.data.goodsList.concat(res.msg.Products)
       });
@@ -165,13 +197,14 @@ Page({
     });
     util.request('http://m2.ddm-home.com/List/GetApiProductList', {
       allimg: false,
-      navigatId: 3,
+      navigatId: this.data.catagoryId,
       page: that.data.page,
       pageSize: 10,
       sort: 'time-desc'
     }, 'POST').then(function (res) {
       wx.hideLoading();
       that.configProductName(res.msg.Products);
+      that.processItemPrice(res.msg.Products);
       that.setData({
         goodsList: that.data.goodsList.concat(res.msg.Products)
       });

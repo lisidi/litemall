@@ -30,7 +30,7 @@
       </view>
     </view>
   </view>
-  <view class="retailPrice">￥{{goods.Price}}　　₩{{goods.OldPrice}} </view>
+  <view class="retailPrice">￥{{goods.Price}}</view>
   <!-- <view class="goods-info">
     <view class="c">
       <text class="desc">{{goods.brief}}</text>

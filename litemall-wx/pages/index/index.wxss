@@ -449,7 +449,7 @@
   flex-flow: row nowrap;
   align-items: center;
   justify-content: center;
-  height: 130rpx;
+  height: 100rpx;
   font-size: 33rpx;
   color: #333;
 }

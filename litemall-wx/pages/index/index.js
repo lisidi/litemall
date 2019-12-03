@@ -30,6 +30,7 @@ Page({
   onPullDownRefresh() {
     wx.showNavigationBarLoading() //在标题栏中显示加载
     this.getIndexData();
+    this.loadFirstPage();
     wx.hideNavigationBarLoading() //完成停止加载
     wx.stopPullDownRefresh() //停止下拉刷新
   },
@@ -40,7 +41,7 @@ Page({
       if (res.errno === 0) {
         that.setData({
           newGoods: res.data.newGoodsList,
-          hotGoods: res.data.hotGoodsList,
+          // hotGoods: res.data.hotGoodsList,
           topics: res.data.topicList,
           brands: res.data.brandList,
           floorGoods: res.data.floorGoodsList,
@@ -110,6 +111,7 @@ Page({
     }
 
     this.getIndexData();
+    this.loadFirstPage();
   },
   onReady: function() {
     // 页面渲染完成
@@ -144,4 +146,73 @@ Page({
       }
     })
   },
+
+  loadFirstPage: function () {
+    var that = this;
+    that.setData({
+      page: 1,
+      hotGoods: []
+    });
+    wx.showLoading({
+      title: '正在加载中...'
+    });
+    util.request('http://m2.ddm-home.com/List/GetApiProductList', {
+      allimg: false,
+      navigatId: this.data.catagoryId,
+      page: that.data.page,
+      pageSize: 10,
+      sort: 'time-desc'
+    }, 'POST').then(function (res) {
+      wx.hideLoading();
+      that.configProductName(res.msg.Products);
+      that.processItemPrice(res.msg.Products);
+      that.setData({
+        hotGoods: that.data.hotGoods.concat(res.msg.Products)
+      });
+    });
+  },
+
+  configProductName: function (products) {
+    for (var i = 0; i < products.length; i++) {
+      products[i].Name = products[i].Name.substring(15, products[i].Name.length);
+      console.log(products[i].Name)
+    }
+  },
+
+  processItemPrice: function (products) {
+    for (var i = 0; i < products.length; i++) {
+      var newPrice = products[i].Price * 1.20;
+      products[i].Price = parseInt(newPrice);
+    }
+  },
+
+  loadNextPage: function () {
+    var that = this;
+    that.setData({
+      page: this.data.page + 1
+    });
+    wx.showLoading({
+      title: '正在加载中...'
+    });
+    util.request('http://m2.ddm-home.com/List/GetApiProductList', {
+      allimg: false,
+      navigatId: this.data.catagoryId,
+      page: that.data.page,
+      pageSize: 10,
+      sort: 'time-desc'
+    }, 'POST').then(function (res) {
+      wx.hideLoading();
+      that.configProductName(res.msg.Products);
+      that.processItemPrice(res.msg.Products);
+      that.setData({
+        hotGoods: that.data.hotGoods.concat(res.msg.Products)
+      });
+    });
+  },
+  onReachBottom: function () {
+    this.loadNextPage();
+  },
+  
+  
+  
 })
